@@ -62,7 +62,6 @@ with dexpression.as_default():
         y = tf.layers.dense(inputs=reshaped, units=7, name='y')
 
     cross_entropy = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(labels=y_, logits=y))
-    tf.summary.scalar("cross_entropy", cross_entropy)
 
     train_step = tf.train.AdamOptimizer(1e-4).minimize(cross_entropy)
     prediction = tf.argmax(y, 1)

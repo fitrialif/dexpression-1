@@ -3,13 +3,17 @@ import dexpression as dx
 import tensorflow as tf
 import time
 import numpy as np
+import shutil
 f10cv = cv.NFoldCV(10)
 
 accs = []
 times = []
+# remove folder to clean up for tensorboard
+shutil.rmtree("./temp")
 for fold in range(10):
     with tf.Session(graph=dx.dexpression) as sess:
-
+        saver = tf.train.Saver()
+        tf.summary.scalar("cross_entropy", dx.cross_entropy)
         merged_summary = tf.summary.merge_all()
         writer = tf.summary.FileWriter("./temp/PA1/{}".format(fold))
         writer.add_graph(sess.graph)
@@ -20,10 +24,12 @@ for fold in range(10):
         # training
         print "{}: Start training on fold#{} a set of {} data points".format(time.strftime("%H:%M:%S"), fold, len(tset))
         start = time.time()
-        for i in range(len(tset)):
-            # for each data point in the trainingset, feed into network
-            dx.train_step.run(feed_dict={dx.x: tset[i], dx.y_: tlabels[i]})
-            s = sess.run(merged_summary, feed_dict={dx.x: tset[i], dx.y_: tlabels[i]})
+        for k in range(8):
+            for i in range(len(tset)):
+                # for each data point in the trainingset, feed into network
+                dx.train_step.run(feed_dict={dx.x: tset[i], dx.y_: tlabels[i]})
+                s = sess.run(merged_summary, feed_dict={dx.x: tset[i], dx.y_: tlabels[i]})
+
         print "@ {}: Done training".format(time.strftime("%H:%M:%S"))
         duration = time.time() - start
         acc = 0
@@ -50,7 +56,9 @@ for fold in range(10):
     # accumulate the accuracies to measure the average for this epoch
     ave_acc += acc
     tf.summary.scalar("accuracy", acc)
-    accs.append("{:0.2f}".format(round(acc, 0)))
+    accs.append("{:0.2f}".format(acc*100))
     times.append("{:0.2f}".format(round(duration, 0)))
+    checkpoint_file = "CP{}-{:0.2f}.sess".format(fold, acc*100)
+    saver.save(sess, checkpoint_file)
 
 print "@ {}: Done:\n accuracies{}\n times:{}".format(time.strftime("%H:%M:%S"), accs, times)
