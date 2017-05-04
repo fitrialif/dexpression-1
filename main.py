@@ -10,7 +10,7 @@ f10cv = cv.NFoldCV(10)
 accs = []
 times = []
 learning_rate = 0.000135
-do_keep_prob1 = 0.70
+do_keep_prob1 = 1.00
 do_keep_prob2 = 1.00
 num_epochs = 6
 # remove folder to clean up for tensorboard
@@ -34,10 +34,12 @@ for fold in range(10):
                 # for each data point in the trainingset, feed into network
                 dx.train_step.run(feed_dict={dx.x: tset[i], dx.y_: tlabels[i], dx.learn_rate: learning_rate,
                                              dx.keep_prob1: do_keep_prob1,
-                                             dx.keep_prob2: do_keep_prob2})
+                                             dx.keep_prob2: do_keep_prob2,
+                                             })
                 s = sess.run(merged_summary, feed_dict={dx.x: tset[i], dx.y_: tlabels[i], dx.learn_rate: learning_rate,
                                                         dx.keep_prob1: do_keep_prob1,
-                                                        dx.keep_prob2: do_keep_prob2})
+                                                        dx.keep_prob2: do_keep_prob2,
+                                                        })
                 writer.add_summary(s, global_step=t)
 
         print "@ {}: Done training".format(time.strftime("%H:%M:%S"))
@@ -51,7 +53,8 @@ for fold in range(10):
             # accuracy will either be "1.0" or "0.0" depending if the label matches the output
             pred = dx.prediction.eval(feed_dict={dx.x: vset[i], dx.y_: vlabels[i], dx.learn_rate : learning_rate,
                                                  dx.keep_prob1:1.00,
-                                                 dx.keep_prob2:1.00})
+                                                 dx.keep_prob2:1.00,
+                                                 })
 
             p = int(pred[0])
             label = int(np.argmax(vlabels[i]))
@@ -84,4 +87,5 @@ ave_acc /= float(len(accs))
 print "@ {}: Done:\n accuracies{}\n times:{}".format(time.strftime("%H:%M:%S"), accs, times)
 print "Dropout1 is at {:0.2f}".format(do_keep_prob1)
 print "Dropout2 is at {:0.2f}".format(do_keep_prob2)
+#print "Has BatchNorm at input"
 print " Average accuracy is {:0.2f}".format(ave_acc)

@@ -9,10 +9,14 @@ with dexpression.as_default():
         x = tf.placeholder(tf.uint8, shape=(1, 224, 224, 1), name="x")
         y_ = tf.placeholder(tf.uint8, shape=(1, 7), name="y_")
 
+        # Batch normalization
+        #with tf.name_scope("BatchNorm"):
+        #    phase = tf.placeholder(dtype=tf.bool, name="phase")
+        #    bn = tf.contrib.layers.batch_norm(tf.cast(x, tf.float32), center=True, scale=True, is_training=phase)
 
         with tf.name_scope("Dropout1"):
             keep_prob1 = tf.placeholder(tf.float32, name="Keep_Prob")
-            do1 = tf.nn.dropout(tf.cast(x,dtype=tf.float32), keep_prob1, name='Dropout1')
+            do1 = tf.nn.dropout(tf.cast(x,tf.float32), keep_prob1, name='Dropout1')
 
         conv1 = tf.layers.conv2d(inputs=do1, filters=64, kernel_size=(7, 7), strides=(2, 2),
                                  padding='same',  name='conv1')
@@ -47,15 +51,16 @@ with dexpression.as_default():
         with tf.name_scope("Dropout2"):
             keep_prob2 = tf.placeholder(tf.float32, name="Keep_Prob")
             do2 = tf.nn.dropout(pool3b, keep_prob2, name='Dropout')
-    # Batch normalization
-    # with tf.name_scope("BatchNorm"):
-        # phase = tf.placeholder(dtype=tf.bool, name="phase")
-        # bn = tf.contrib.layers.batch_norm(pool3b, center=True, scale=True, is_training=phase)
 
     # Dropout Layer
     # with tf.name_scope("Dropout"):
         # keep_prob = tf.placeholder(tf.float32, name="Keep_Prob")
         # h_drop = tf.nn.dropout(bn, keep_prob, name='Dropout')
+
+    # Batch normalization
+     #with tf.name_scope("BatchNorm"):
+     #   phase = tf.placeholder(dtype=tf.bool, name="phase")
+     #   bn = tf.contrib.layers.batch_norm(do2, center=True, scale=True, is_training=phase)
 
     with tf.name_scope("Classifier"):
         def weight_variable(shape):
